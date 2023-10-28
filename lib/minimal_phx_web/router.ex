@@ -18,6 +18,7 @@ defmodule MinimalPhxWeb.Router do
     pipe_through :browser
 
     get "/", PageController, :home
+    get "/_status/healthz", PageController, :health
   end
 
   # Other scopes may use custom stacks.
