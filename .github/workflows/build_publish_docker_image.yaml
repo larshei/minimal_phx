@@ -1,0 +1,51 @@
+name: Build and Publish Default Phoenix 1.7 Image
+
+env:
+  ORGANIZATION: larshei
+  PROJECT_NAME: minimal_phx
+  IMAGE_TAG: ${{github.sha}}
+  GITHUB_USERNAME: ${{github.actor}}
+  GITHUB_TOKEN: ${{github.token}}
+
+on:
+  push:
+    branches:
+      - "**"
+
+permissions: write-all
+
+jobs:
+  build:
+    name: Build and Publish
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Create docker parameters
+        run: |
+          echo "IMAGE=ghcr.io/$ORGANIZATION/$PROJECT_NAME" >> $GITHUB_ENV
+          echo "APP_VERSION=$(cat mix.exs | grep version | sed -e 's/.*version: "\(.*\)",/\1/')" >> $GITHUB_ENV
+      - name: Login to Docker Registry
+        run: |
+          docker login ghcr.io -u $GITHUB_USERNAME -p $GITHUB_TOKEN
+      - name: Build Docker Image
+        run: |
+          docker build \
+          --rm \
+          --build-arg GITHUB_USERNAME=$GITHUB_USERNAME \
+          --build-arg GITHUB_TOKEN=$GITHUB_TOKEN \
+          -t $IMAGE:latest \
+          -t $IMAGE:$APP_VERSION \
+          -t $IMAGE:$APP_VERSION-${GITHUB_REF##*/} \
+          -t $IMAGE:develop \
+          .
+      - name: Publish to Docker Registry / Master
+        if: github.ref == 'refs/heads/master'
+        run: |
+          docker push $IMAGE:latest
+          docker push $IMAGE:$APP_VERSION
+      - name: Publish to Docker Registry / Other
+        if: github.ref != 'refs/heads/master'
+        run: |
+          docker push $IMAGE:$APP_VERSION-${GITHUB_REF##*/}
+          docker push $IMAGE:develop
