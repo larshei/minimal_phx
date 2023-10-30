@@ -19,6 +19,7 @@ defmodule MinimalPhxWeb.Router do
 
     get "/", PageController, :home
     get "/_status/healthz", PageController, :health
+    post "/iwashere", IWasHereController, :here
   end
 
   # Other scopes may use custom stacks.
