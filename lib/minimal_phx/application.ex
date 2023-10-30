@@ -9,7 +9,7 @@ defmodule MinimalPhx.Application do
   def start(_type, _args) do
     children = [
       MinimalPhxWeb.Telemetry,
-      # MinimalPhx.Repo,
+      MinimalPhx.Repo,
       {DNSCluster, query: Application.get_env(:minimal_phx, :dns_cluster_query) || :ignore},
       {Phoenix.PubSub, name: MinimalPhx.PubSub},
       # Start a worker by calling: MinimalPhx.Worker.start_link(arg)
